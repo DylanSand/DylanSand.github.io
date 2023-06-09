@@ -43,7 +43,7 @@
 		    </script>
 		    <a class="sidebar-nav-item" style="font-size: 18px" href="https://www.ox.ac.uk/admissions/graduate/courses/dphil-engineering-science">DPhil in Engineering Science</a>
 		    <a class="sidebar-nav-item" style="font-size: 18px" href="https://www.ox.ac.uk/">University of Oxford</a>
-		    <br></br>
+		    <br>
               <font color="#cfcfcf">Contact Info:</font>
 		    <a class="sidebar-nav-item" style="font-size: 18px" href="mailto:dylan.sandfelder@mail.mcgill.ca">dylan.sandfelder@mail.mcgill.ca</a>
             </nav>
@@ -96,8 +96,15 @@
 
         <h2 id="lifegame">Something fun...</h2>
         <canvas id="golCanvas" style="width: 100%; height: 300px;">Go and look for a new browser.</canvas>
-        <div style="text-align: right;"><a id="reloadgame" href="./#">Reload Conway's Game of Life</a></div>
-
+        <div id="stillplaying" style="text-align: right;">
+          <div style="text-align: left; position: absolute;"><strong>Current Score:</strong></div>
+          <div style="text-align: center; position: relative;"><strong id="score"></strong></div>
+        </div>
+        <div id="doneplaying" style="text-align: right; display: none;">
+          <div style="text-align: left; position: absolute;"><strong>You got a score of:</strong></div>
+          <div style="text-align: center; position: relative;"><strong id="scorefinal"></strong></div>
+          <div style="text-align: left;"><a id="reloadgame" href="./#">Reload Conway's Game of Life</a></div>
+        </div>
     </div>
 
 </body>
@@ -110,16 +117,28 @@
   var LEN = 10;
   var x = Math.floor(WIDTH/LEN);
   var y = HEIGHT/LEN;
+  var curScore = 0;
+  var seenArrays = {};
+  var isDone = false;
   var myGol;
-  var golTmp;   
+  var golTmp;
+  function seenArray(arr) {
+    curHash = String(arr.flat());
+    if(curHash in seenArrays) {
+      return true;
+    } else {
+      seenArrays[curHash] = true;
+      return false;
+    }
+  }
   function initTmp() {
     for(var xVal = 0; xVal <= x+2; xVal++) {
       golTmp[xVal] = new Array();
       for(var yVal = 0; yVal <= y+2; yVal++) {
         golTmp[xVal][yVal] = 0;
       }
-    } 
-  } 
+    }
+  }
   function initMatrix() {
     ctx.fillStyle = "rgb(222,222,222)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -134,10 +153,10 @@
         myGol[xVal][yVal] = randVal;
         if (randVal == 1) {
           ctx.fillStyle = "rgb(31,102,184)";
-          draw(xVal+1, yVal+1)
+          draw(xVal+1, yVal+1);
         }
       }
-    }  
+    }
   }
   function draw(x, y) {
     ctx.fillRect(LEN*(x-1), LEN*(y-1), LEN, LEN);
@@ -164,12 +183,24 @@
         }
       }
     }
-    myGol = golTmp.slice();  
+    myGol = golTmp.slice();
+    if(seenArray(myGol)) {
+      document.getElementById("scorefinal").innerHTML = String(curScore)
+      document.getElementById("stillplaying").style.display = "none"
+      document.getElementById("doneplaying").style.display = "block"
+    } else {
+      curScore = curScore + 1;
+    }
+    document.getElementById("score").innerHTML = String(curScore)
   }
   window.onload = function() {
     var a = document.getElementById("reloadgame");
     a.onclick = function() {
       initMatrix();
+      seenArrays = {};
+      curScore = 0;
+      document.getElementById("stillplaying").style.display = "block"
+      document.getElementById("doneplaying").style.display = "none"
       return false;
     }
   }
@@ -178,4 +209,3 @@
 </script>
 
 </html>
-
