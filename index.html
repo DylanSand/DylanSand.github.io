@@ -110,6 +110,7 @@
 </body>
 
 <script>
+  var server_url = 'http://18.209.65.154:3000';
   var canvas = document.getElementById("golCanvas");
   var WIDTH = canvas.width;
   var HEIGHT = canvas.height;
@@ -122,6 +123,21 @@
   var isDone = false;
   var myGol;
   var golTmp;
+  var gotScores = false;
+  async function getScores() {
+    if(!gotScores) {
+      gotScores = true;
+      var res = await fetch(server_url + '/getScores/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      res = res.json();
+      console.log(myJson);
+    }
+  }
   function seenArray(arr) {
     curHash = String(arr.flat());
     if(curHash in seenArrays) {
@@ -185,6 +201,7 @@
     }
     myGol = golTmp.slice();
     if(seenArray(myGol)) {
+      getScores();
       document.getElementById("scorefinal").innerHTML = String(curScore)
       document.getElementById("stillplaying").style.display = "none"
       document.getElementById("doneplaying").style.display = "block"
@@ -201,6 +218,7 @@
       curScore = 0;
       document.getElementById("stillplaying").style.display = "block"
       document.getElementById("doneplaying").style.display = "none"
+      gotScores = false;
       return false;
     }
   }
