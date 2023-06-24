@@ -101,8 +101,18 @@
           <div style="text-align: center; position: relative;"><strong id="score"></strong></div>
         </div>
         <div id="doneplaying" style="text-align: right; display: none;">
-          <div style="text-align: left; position: absolute;"><strong>You got a score of:</strong></div>
-          <div style="text-align: center; position: relative;"><strong id="scorefinal"></strong></div>
+          <div style="position: relative; height: 20px;">
+            <div style="text-align: left; position: absolute;"><strong>You got a score of:</strong></div>
+            <div style="text-align: center; position: relative;"><strong id="scorefinal"></strong></div>
+          </div>
+          <div style="position: relative; height: 20px;">
+            <div style="text-align: left; position: absolute;"><strong>Current high score:</strong></div>
+            <div style="text-align: center; position: relative;"><strong id="scoremax">Loading...</strong></div>
+          </div>
+          <div style="position: relative; height: 20px;">
+            <div style="text-align: left; position: absolute;"><strong>Current low score:</strong></div>
+            <div style="text-align: center; position: relative;"><strong id="scoremin">Loading...</strong></div>
+          </div>
           <div style="text-align: left;"><a id="reloadgame" href="./#">Reload Conway's Game of Life</a></div>
         </div>
     </div>
@@ -125,12 +135,10 @@
   let gotScores = false;
   let initMat;
   async function getScores(score) {
-    if (!gotScores) {
-      gotScores = true;
-      let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score));
-      res = await res.json();
-      return res["result"];
-    }
+    gotScores = true;
+    let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score));
+    res = await res.json();
+    return res["result"];
   }
   function seenArray(arr) {
     let curHash = String(arr.flat());
@@ -197,23 +205,22 @@
     }
     myGol = golTmp.slice();
     if (seenArray(myGol)) {
-      getScores(curScore)
-        .then((value) => {
-          const scoreArr = value.split(", ");
-          const curMax = Number(scoreArr[0].substring(5));
-          const curMin = Number(scoreArr[1].substring(5));
-          console.log(curMax);
-          console.log(curMin);
-          document.getElementById("scorefinal").innerHTML = String(curScore);
-          document.getElementById("stillplaying").style.display = "none";
-          document.getElementById("doneplaying").style.display = "block";
-        })
-        .catch((err) => {
-          console.log(err);
-          document.getElementById("scorefinal").innerHTML = String(curScore);
-          document.getElementById("stillplaying").style.display = "none";
-          document.getElementById("doneplaying").style.display = "block";
-        });
+      if (!gotScores) {
+        document.getElementById("scorefinal").innerHTML = String(curScore);
+        document.getElementById("stillplaying").style.display = "none";
+        document.getElementById("doneplaying").style.display = "block";
+        getScores(curScore)
+          .then((value) => {
+            const scoreArr = value.split(", ");
+            const curMax = Number(scoreArr[0].substring(5));
+            const curMin = Number(scoreArr[1].substring(5));
+            document.getElementById("scoremax").innerHTML = String(curMax);
+            document.getElementById("scoremin").innerHTML = String(curMin);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     } else {
       curScore = curScore + 1;
     }
