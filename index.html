@@ -101,17 +101,23 @@
           <div style="text-align: center; position: relative;"><strong id="score"></strong></div>
         </div>
         <div id="doneplaying" style="text-align: right; display: none;">
-          <div style="position: relative; height: 20px;">
+          <div style="position: relative; height: 23px;">
             <div style="text-align: left; position: absolute;"><strong>You got a score of:</strong></div>
             <div style="text-align: center; position: relative;"><strong id="scorefinal"></strong></div>
           </div>
-          <div style="position: relative; height: 20px;">
+          <div style="position: relative; height: 23px;">
             <div style="text-align: left; position: absolute;"><strong>Current high score:</strong></div>
             <div style="text-align: center; position: relative;"><strong id="scoremax">Loading...</strong></div>
           </div>
-          <div style="position: relative; height: 20px;">
+          <div style="position: relative; height: 23px;">
             <div style="text-align: left; position: absolute;"><strong>Current low score:</strong></div>
             <div style="text-align: center; position: relative;"><strong id="scoremin">Loading...</strong></div>
+          </div>
+          <div style="position: relative; height: 23px; display: none;" id="newmax">
+            <div style="text-align: left; position: absolute;"><i>Congrats! You got the new high score!</i></div>
+          </div>
+          <div style="position: relative; height: 23px; display: none;" id="newmin">
+            <div style="text-align: left; position: absolute;"><i>Congrats! You got the new low score!</i></div>
           </div>
           <div style="text-align: left;"><a id="reloadgame" href="./#">Reload Conway's Game of Life</a></div>
         </div>
@@ -214,8 +220,15 @@
             const scoreArr = value.split(", ");
             const curMax = Number(scoreArr[0].substring(5));
             const curMin = Number(scoreArr[1].substring(5));
+            if (curScore == curMax) {
+              document.getElementById("newmax").style.display = "block";
+            }
+            if (curScore == curMin) {
+              document.getElementById("newmin").style.display = "block";
+            }
             document.getElementById("scoremax").innerHTML = String(curMax);
             document.getElementById("scoremin").innerHTML = String(curMin);
+
           })
           .catch((err) => {
             console.log(err);
@@ -234,6 +247,10 @@
       curScore = 0;
       document.getElementById("stillplaying").style.display = "block";
       document.getElementById("doneplaying").style.display = "none";
+      document.getElementById("newmax").style.display = "none";
+      document.getElementById("newmin").style.display = "none";
+      document.getElementById("scoremax").innerHTML = "Loading...";
+      document.getElementById("scoremin").innerHTML = "Loading...";
       gotScores = false;
       return false;
     }
