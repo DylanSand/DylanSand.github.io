@@ -209,6 +209,7 @@
           document.getElementById("doneplaying").style.display = "block";
         })
         .catch((err) => {
+          console.log(err);
           document.getElementById("scorefinal").innerHTML = String(curScore);
           document.getElementById("stillplaying").style.display = "none";
           document.getElementById("doneplaying").style.display = "block";
