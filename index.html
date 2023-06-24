@@ -110,37 +110,37 @@
 </body>
 
 <script>
-  var server_url = 'http://18.209.65.154:3000';
-  var canvas = document.getElementById("golCanvas");
-  var WIDTH = canvas.width;
-  var HEIGHT = canvas.height;
-  var ctx = canvas.getContext("2d");
-  var LEN = 10;
-  var x = Math.floor(WIDTH/LEN);
-  var y = HEIGHT/LEN;
-  var curScore = 0;
-  var seenArrays = {};
-  var isDone = false;
-  var myGol;
-  var golTmp;
-  var gotScores = false;
-  async function getScores() {
-    if(!gotScores) {
+  let canvas = document.getElementById("golCanvas");
+  let WIDTH = canvas.width;
+  let HEIGHT = canvas.height;
+  let LEN = 10;
+  let x = Math.floor(WIDTH/LEN);
+  let y = HEIGHT/LEN;
+  let ctx = canvas.getContext("2d");
+  let curScore = 0;
+  let seenArrays = {};
+  let isDone = false;
+  let myGol;
+  let golTmp;
+  let gotScores = false;
+  let initMat;
+  async function getScores(score) {
+    if (!gotScores) {
       gotScores = true;
-      var res = await fetch(server_url + '/getScores/', {
-        method: 'GET',
-        mode: 'cors',
+      let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score), {
+        method: "GET",
+        mode: "cors",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         }
       });
       res = res.json();
-      console.log(myJson);
+      return res["result"];
     }
   }
   function seenArray(arr) {
-    curHash = String(arr.flat());
-    if(curHash in seenArrays) {
+    let curHash = String(arr.flat());
+    if (curHash in seenArrays) {
       return true;
     } else {
       seenArrays[curHash] = true;
@@ -148,9 +148,9 @@
     }
   }
   function initTmp() {
-    for(var xVal = 0; xVal <= x+2; xVal++) {
+    for (let xVal = 0; xVal <= x + 2; xVal++) {
       golTmp[xVal] = new Array();
-      for(var yVal = 0; yVal <= y+2; yVal++) {
+      for (let yVal = 0; yVal <= y + 2; yVal++) {
         golTmp[xVal][yVal] = 0;
       }
     }
@@ -158,15 +158,17 @@
   function initMatrix() {
     ctx.fillStyle = "rgb(222,222,222)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    initMat = '';
     myGol = new Array();
     golTmp = new Array();
-    for(var xVal = 0; xVal <= x+2; xVal++) {
+    for (let xVal = 0; xVal <= x + 2; xVal++) {
       myGol[xVal] = new Array();
       golTmp[xVal] = new Array();
-      for(var yVal = 0; yVal <= y+2; yVal++) {
+      for (let yVal = 0; yVal <= y + 2; yVal++) {
         golTmp[xVal][yVal] = 0;
-        var randVal = Math.floor((Math.random()*2));
+        let randVal = Math.floor((Math.random()*2));
         myGol[xVal][yVal] = randVal;
+        initMat += String(randVal);
         if (randVal == 1) {
           ctx.fillStyle = "rgb(31,102,184)";
           draw(xVal+1, yVal+1);
@@ -181,17 +183,17 @@
     initTmp();
     ctx.fillStyle = "rgb(222,222,222)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    for(var xVal = 1; xVal <= x+1; xVal++) {
-      for(var yVal = 1; yVal<=y+1; yVal++) {
-        var neighbourSum = myGol[xVal-1][yVal] + myGol[xVal-1][yVal-1] + myGol[xVal-1][yVal+1] + myGol[xVal][yVal-1] + myGol[xVal][yVal+1] + myGol[xVal+1][yVal] + myGol[xVal+1][yVal+1] + myGol[xVal+1][yVal-1];
-        if(myGol[xVal][yVal] == 1) {
+    for (let xVal = 1; xVal <= x + 1; xVal++) {
+      for (let yVal = 1; yVal <= y + 1; yVal++) {
+        let neighbourSum = myGol[xVal-1][yVal] + myGol[xVal-1][yVal-1] + myGol[xVal-1][yVal+1] + myGol[xVal][yVal-1] + myGol[xVal][yVal+1] + myGol[xVal+1][yVal] + myGol[xVal+1][yVal+1] + myGol[xVal+1][yVal-1];
+        if (myGol[xVal][yVal] == 1) {
           if(neighbourSum == 2 || neighbourSum == 3) {
             golTmp[xVal][yVal] = 1;
             ctx.fillStyle = "rgb(0,33,71)";
             draw(xVal, yVal);
           }
         } else {
-          if(neighbourSum == 3) {
+          if (neighbourSum == 3) {
             golTmp[xVal][yVal] = 1;
             ctx.fillStyle = "rgb(31,102,184)";
             draw(xVal, yVal);
@@ -200,24 +202,36 @@
       }
     }
     myGol = golTmp.slice();
-    if(seenArray(myGol)) {
-      getScores();
-      document.getElementById("scorefinal").innerHTML = String(curScore)
-      document.getElementById("stillplaying").style.display = "none"
-      document.getElementById("doneplaying").style.display = "block"
+    if (seenArray(myGol)) {
+      getScores(curScore)
+        .then((value) => {
+          const scoreArr = value.split(", ");
+          const curMax = Number(scoreArr[0].substring(5));
+          const curMin = Number(scoreArr[1].substring(5));
+          console.log(curMax);
+          console.log(curMin);
+          document.getElementById("scorefinal").innerHTML = String(curScore);
+          document.getElementById("stillplaying").style.display = "none";
+          document.getElementById("doneplaying").style.display = "block";
+        })
+        .catch((err) => {
+          document.getElementById("scorefinal").innerHTML = String(curScore);
+          document.getElementById("stillplaying").style.display = "none";
+          document.getElementById("doneplaying").style.display = "block";
+        });
     } else {
       curScore = curScore + 1;
     }
-    document.getElementById("score").innerHTML = String(curScore)
+    document.getElementById("score").innerHTML = String(curScore);
   }
   window.onload = function() {
-    var a = document.getElementById("reloadgame");
+    let a = document.getElementById("reloadgame");
     a.onclick = function() {
       initMatrix();
       seenArrays = {};
       curScore = 0;
-      document.getElementById("stillplaying").style.display = "block"
-      document.getElementById("doneplaying").style.display = "none"
+      document.getElementById("stillplaying").style.display = "block";
+      document.getElementById("doneplaying").style.display = "none";
       gotScores = false;
       return false;
     }
