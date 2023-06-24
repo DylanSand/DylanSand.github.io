@@ -127,13 +127,7 @@
   async function getScores(score) {
     if (!gotScores) {
       gotScores = true;
-      let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score), {
-        method: "GET",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score));
       res = res.json();
       return res["result"];
     }
