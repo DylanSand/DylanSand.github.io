@@ -128,7 +128,9 @@
     if (!gotScores) {
       gotScores = true;
       let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score));
+      console.log(res);
       res = res.json();
+      console.log(res);
       return res["result"];
     }
   }
@@ -199,6 +201,7 @@
     if (seenArray(myGol)) {
       getScores(curScore)
         .then((value) => {
+          console.log(value);
           const scoreArr = value.split(", ");
           const curMax = Number(scoreArr[0].substring(5));
           const curMin = Number(scoreArr[1].substring(5));
