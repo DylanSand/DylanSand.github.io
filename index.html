@@ -118,7 +118,7 @@
           <div style="position: relative; height: 23px; display: none;" id="newmin">
             <div style="text-align: left; position: absolute;"><i>Congrats! You got the new low score!</i></div>
           </div>
-          <div style="text-align: left;"><a id="reloadgame" href="./#">Reload Conway's Game of Life</a></div>
+          <div style="text-align: left;"><a id="reloadgame" href="./#">Reset with new random setup</a></div>
         </div>
     </div>
 
@@ -126,137 +126,141 @@
 
 <script>
   console.log("Welcome to the console, friend. Hope you're enjoying my website!");
-  let canvas = document.getElementById("golCanvas");
-  let WIDTH = canvas.width;
-  let HEIGHT = canvas.height;
-  let LEN = 10;
-  let x = Math.floor(WIDTH/LEN);
-  let y = HEIGHT/LEN;
-  let ctx = canvas.getContext("2d");
+  const canvas = document.getElementById('golCanvas');
+  const WIDTH = canvas.width;
+  const HEIGHT = canvas.height;
+  const LEN = 4;
+  const x = Math.floor(WIDTH / LEN);
+  const y = Math.floor(HEIGHT / LEN);
+  const ctx = canvas.getContext('2d');
   let curScore = 0;
   let seenArrays = {};
-  let isDone = false;
   let myGol;
   let golTmp;
   let gotScores = false;
   let initMat;
   async function getScores(score) {
     gotScores = true;
-    let res = await fetch("https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=" + initMat + "&score=" + String(score));
+    let res = await fetch(`https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=${initMat}&score=${String(score)}`);
     res = await res.json();
-    return res["result"];
+    return res.result;
   }
   function seenArray(arr) {
-    let curHash = String(arr.flat());
+    const curHash = String(arr.flat());
     if (curHash in seenArrays) {
       return true;
-    } else {
-      seenArrays[curHash] = true;
-      return false;
     }
+    seenArrays[curHash] = true;
+    return false;
   }
   function initTmp() {
     for (let xVal = 0; xVal <= x + 2; xVal++) {
-      golTmp[xVal] = new Array();
+      golTmp[xVal] = [];
       for (let yVal = 0; yVal <= y + 2; yVal++) {
         golTmp[xVal][yVal] = 0;
       }
     }
   }
   function initMatrix() {
-    ctx.fillStyle = "rgb(222,222,222)";
+    ctx.fillStyle = 'rgb(222,222,222)';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     initMat = '';
-    myGol = new Array();
-    golTmp = new Array();
+    myGol = [];
+    golTmp = [];
     for (let xVal = 0; xVal <= x + 2; xVal++) {
-      myGol[xVal] = new Array();
-      golTmp[xVal] = new Array();
+      myGol[xVal] = [];
+      golTmp[xVal] = [];
       for (let yVal = 0; yVal <= y + 2; yVal++) {
         golTmp[xVal][yVal] = 0;
-        let randVal = Math.floor((Math.random()*2));
+        const randVal = Math.floor((Math.random() * 2));
         myGol[xVal][yVal] = randVal;
         initMat += String(randVal);
-        if (randVal == 1) {
-          ctx.fillStyle = "rgb(31,102,184)";
-          draw(xVal+1, yVal+1);
+        if (randVal === 1) {
+          ctx.fillStyle = 'rgb(31,102,184)';
+          draw(xVal + 1, yVal + 1);
         }
       }
     }
+    console.log(myGol.length);
+    console.log(myGol[0].length);
   }
-  function draw(x, y) {
-    ctx.fillRect(LEN*(x-1), LEN*(y-1), LEN, LEN);
+  function draw(xD, yD) {
+    ctx.fillRect(LEN * (xD - 1), LEN * (yD - 1), LEN, LEN);
   }
   function nextStep() {
     initTmp();
-    ctx.fillStyle = "rgb(222,222,222)";
+    ctx.fillStyle = 'rgb(222,222,222)';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     for (let xVal = 1; xVal <= x + 1; xVal++) {
       for (let yVal = 1; yVal <= y + 1; yVal++) {
-        let neighbourSum = myGol[xVal-1][yVal] + myGol[xVal-1][yVal-1] + myGol[xVal-1][yVal+1] + myGol[xVal][yVal-1] + myGol[xVal][yVal+1] + myGol[xVal+1][yVal] + myGol[xVal+1][yVal+1] + myGol[xVal+1][yVal-1];
-        if (myGol[xVal][yVal] == 1) {
-          if(neighbourSum == 2 || neighbourSum == 3) {
+        let neighbourSum = myGol[xVal - 1][yVal];
+        neighbourSum += myGol[xVal - 1][yVal - 1];
+        neighbourSum += myGol[xVal - 1][yVal + 1];
+        neighbourSum += myGol[xVal][yVal - 1];
+        neighbourSum += myGol[xVal][yVal + 1];
+        neighbourSum += myGol[xVal + 1][yVal];
+        neighbourSum += myGol[xVal + 1][yVal + 1];
+        neighbourSum += myGol[xVal + 1][yVal - 1];
+        if (myGol[xVal][yVal] === 1) {
+          if (neighbourSum === 2 || neighbourSum === 3) {
             golTmp[xVal][yVal] = 1;
-            ctx.fillStyle = "rgb(0,33,71)";
+            ctx.fillStyle = 'rgb(0,33,71)';
             draw(xVal, yVal);
           }
-        } else {
-          if (neighbourSum == 3) {
-            golTmp[xVal][yVal] = 1;
-            ctx.fillStyle = "rgb(31,102,184)";
-            draw(xVal, yVal);
-          }
+        } else if (neighbourSum === 3) {
+          golTmp[xVal][yVal] = 1;
+          ctx.fillStyle = 'rgb(31,102,184)';
+          draw(xVal, yVal);
         }
       }
     }
     myGol = golTmp.slice();
     if (seenArray(myGol)) {
       if (!gotScores) {
-        document.getElementById("scorefinal").innerHTML = String(curScore);
-        document.getElementById("stillplaying").style.display = "none";
-        document.getElementById("doneplaying").style.display = "block";
+        document.getElementById('scorefinal').innerHTML = String(curScore);
+        document.getElementById('stillplaying').style.display = 'none';
+        document.getElementById('doneplaying').style.display = 'block';
         getScores(curScore)
           .then((value) => {
-            const scoreArr = value.split(", ");
+            const scoreArr = value.split(', ');
             const curMax = Number(scoreArr[0].substring(5));
             const curMin = Number(scoreArr[1].substring(5));
-            if (curScore == curMax) {
-              document.getElementById("newmax").style.display = "block";
+            if (curScore === curMax) {
+              document.getElementById('newmax').style.display = 'block';
             }
-            if (curScore == curMin) {
-              document.getElementById("newmin").style.display = "block";
+            if (curScore === curMin) {
+              document.getElementById('newmin').style.display = 'block';
             }
-            document.getElementById("scoremax").innerHTML = String(curMax);
-            document.getElementById("scoremin").innerHTML = String(curMin);
-
+            document.getElementById('scoremax').innerHTML = String(curMax);
+            document.getElementById('scoremin').innerHTML = String(curMin);
           })
           .catch((err) => {
             console.log(err);
           });
       }
     } else {
-      curScore = curScore + 1;
+      curScore += 1;
     }
-    document.getElementById("score").innerHTML = String(curScore);
+    document.getElementById('score').innerHTML = String(curScore);
   }
-  window.onload = function() {
-    let a = document.getElementById("reloadgame");
-    a.onclick = function() {
+  window.onload = function () {
+    const a = document.getElementById('reloadgame');
+    a.onclick = function () {
       initMatrix();
       seenArrays = {};
       curScore = 0;
-      document.getElementById("stillplaying").style.display = "block";
-      document.getElementById("doneplaying").style.display = "none";
-      document.getElementById("newmax").style.display = "none";
-      document.getElementById("newmin").style.display = "none";
-      document.getElementById("scoremax").innerHTML = "Loading...";
-      document.getElementById("scoremin").innerHTML = "Loading...";
+      document.getElementById('stillplaying').style.display = 'block';
+      document.getElementById('doneplaying').style.display = 'none';
+      document.getElementById('newmax').style.display = 'none';
+      document.getElementById('newmin').style.display = 'none';
+      document.getElementById('scoremax').innerHTML = 'Loading...';
+      document.getElementById('scoremin').innerHTML = 'Loading...';
       gotScores = false;
       return false;
-    }
-  }
+    };
+  };
   initMatrix();
-  setInterval(nextStep, 170);
+  setInterval(nextStep, 92);
 </script>
 
 </html>
