@@ -149,7 +149,8 @@
   let initMat;
   async function getScores(score) {
     gotScores = true;
-    let res = await fetch(`https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=${initMat}&score=${String(score)}`);
+    //let res = await fetch(`https://getscores-b6g7wawsrq-uc.a.run.app/getscores?grid=${initMat}&score=${String(score)}`);
+    let res = await fetch(`https://us-central1-websitegamescores.cloudfunctions.net/getscores?grid=${initMat}&score=${String(score)}`);
     res = await res.json();
     return res.result;
   }
